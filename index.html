@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MachoMenus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+    --menu-x:3vw;--menu-y:5vh;
+    --bg-0:#030305;--bg-1:#07070d;--bg-2:#0c0c18;
+    --accent:#00d4ff;--accent-dim:rgba(0,212,255,0.10);
+    --accent-glow:rgba(0,212,255,0.22);--accent-border:rgba(0,212,255,0.20);
+    --accent-border-soft:rgba(0,212,255,0.07);
+    --text-0:#e8edf8;--text-1:#c0c8d8;--text-2:#7880a0;--text-3:#3a3d55;
+    --danger:#ff3355;--warn:#ffaa00;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:transparent!important;height:100vh;overflow:hidden;user-select:none;
+    font-family:'Space Grotesk',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;color:var(--text-1);}
+#root{height:100%;background:transparent!important;pointer-events:none;position:relative;}
+.PWrapper{position:absolute;display:flex;left:var(--menu-x);top:var(--menu-y);justify-content:center;
+    align-items:center;flex-direction:column;pointer-events:auto;
+    filter:drop-shadow(0 0.4vw 1.2vw rgba(0,0,0,0.85)) drop-shadow(0 0 0.5vw rgba(0,212,255,0.07));}
+.PWrapper .PBanner{position:relative;display:flex;width:100%;height:5.5vw;justify-content:flex-start;
+    align-items:flex-end;overflow:hidden;
+    border-top:.04vw solid var(--accent-border);border-left:.04vw solid var(--accent-border);border-right:.04vw solid var(--accent-border);
+    background:var(--bg-1);}
+.PWrapper .PBanner::before{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 25%,rgba(3,3,5,.92) 100%),
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,212,255,.012) 3px,rgba(0,212,255,.012) 4px);
+    pointer-events:none;z-index:1;}
+.PWrapper .PBanner::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:.04vw;
+    background:linear-gradient(90deg,transparent 0%,var(--accent-border) 30%,var(--accent) 50%,var(--accent-border) 70%,transparent 100%);
+    z-index:2;box-shadow:0 0 .4vw var(--accent-glow);}
+.PWrapper .PBanner img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.55;mix-blend-mode:luminosity;}
+.PWrapper .PBanner .PBannerTitle{position:relative;z-index:3;padding:0 .7vw .45vw;
+    font-family:'JetBrains Mono',monospace;font-size:.85vw;font-weight:700;letter-spacing:.3vw;
+    color:var(--accent);text-transform:uppercase;text-shadow:0 0 .5vw var(--accent-glow),0 0 1.2vw rgba(0,212,255,.1);}
+.PWrapper .PBanner .PBannerSub{position:absolute;right:.7vw;bottom:.45vw;z-index:3;
+    font-family:'JetBrains Mono',monospace;font-size:.5vw;font-weight:400;letter-spacing:.1vw;color:var(--text-3);text-transform:uppercase;}
+.PWrapper .PElements{position:relative;display:flex;justify-content:flex-start;align-items:stretch;flex-direction:row;}
+.PWrapper .PElements .PScroll{position:absolute;display:flex;right:-.8vw;top:0;width:.5vw;height:100%;
+    background:rgba(0,0,0,.5);justify-content:flex-start;align-items:center;flex-direction:column;gap:.1vw;border:.04vw solid var(--accent-border-soft);}
+.PWrapper .PElements .PScroll i{font-size:.46vw;color:var(--text-3);margin:.1vw 0;transition:color .2s;}
+.PWrapper .PElements .PScroll:hover i{color:var(--accent);}
+.PWrapper .PElements .PScroll .PSProgressWrapper{position:relative;display:flex;width:.2vw;height:90%;justify-content:center;align-items:flex-start;}
+.PWrapper .PElements .PScroll .PSProgress{position:relative;display:flex;width:.2vw;margin-top:.1vw;
+    background:linear-gradient(180deg,var(--accent) 0%,rgba(0,212,255,.35) 100%);box-shadow:0 0 .2vw var(--accent-glow);transition:top .25s ease,height .25s ease;}
+.PWrapper .PElements .PRightElements{position:relative;display:flex;width:19.0104vw;justify-content:center;align-items:center;flex-direction:column;}
+.PWrapper .PCategories{position:relative;display:flex;width:100%;height:1.5625vw;justify-content:flex-start;align-items:center;flex-direction:row;
+    background:var(--bg-1);border-left:.04vw solid var(--accent-border);border-right:.04vw solid var(--accent-border);border-bottom:.04vw solid var(--accent-border);overflow:hidden;}
+.PWrapper .PCategories .PCategory{position:relative;display:flex;flex:1;text-align:center;height:100%;justify-content:center;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:.55vw;font-weight:500;letter-spacing:.07vw;text-transform:uppercase;
+    color:var(--text-3);transition:color .2s,background .2s;cursor:default;}
+.PWrapper .PCategories .PCategory.active{color:var(--accent);background:var(--accent-dim);}
+.PWrapper .PCategories .PCategory.active::after{content:"";position:absolute;bottom:0;left:15%;width:70%;height:.04vw;background:var(--accent);box-shadow:0 0 .18vw var(--accent-glow);}
+.PWrapper .PCategories .PCategory:only-child{position:absolute;left:0;padding:0 .7vw;justify-content:flex-start;font-size:.6vw;letter-spacing:.08vw;}
+.PWrapper .PTabs{position:relative;display:flex;width:19.0104vw;height:auto;max-height:14.0625vw;justify-content:flex-start;align-items:center;flex-direction:column;
+    background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);border-left:.04vw solid var(--accent-border);border-right:.04vw solid var(--accent-border);
+    overflow-y:auto;overflow-x:hidden;padding:.15vw 0;scroll-behavior:smooth;scrollbar-width:none;}
+.PWrapper .PTabs::-webkit-scrollbar{display:none;}
+.PWrapper .PTabs .PTab{position:relative;display:flex;width:100%;height:1.5625vw;min-height:1.5625vw;max-height:1.5625vw;
+    justify-content:center;align-items:center;border-bottom:.03vw solid rgba(0,212,255,.035);z-index:1;transition:background .15s;}
+.PWrapper .PTabs .PTab:hover{background:rgba(0,212,255,.04);}
+.PWrapper .PTabs .PTab .PTLabel,.PWrapper .PTabs .PTab .Checkbox,.PWrapper .PTabs .PTab .Slider,
+.PWrapper .PTabs .PTab .TOptions,.PWrapper .PTabs .PTab .Scrollable,.PWrapper .PTabs .PTab .Divider{filter:blur(.3px);transition:filter .2s ease;}
+.PWrapper .PTabs .PTab:hover .PTLabel,.PWrapper .PTabs .PTab:hover .Checkbox,.PWrapper .PTabs .PTab:hover .Slider,
+.PWrapper .PTabs .PTab:hover .TOptions,.PWrapper .PTabs .PTab:hover .Scrollable,.PWrapper .PTabs .PTab:hover .Divider,
+.PWrapper .PTabs .PTab.active .PTLabel,.PWrapper .PTabs .PTab.active .Checkbox,.PWrapper .PTabs .PTab.active .Slider,
+.PWrapper .PTabs .PTab.active .TOptions,.PWrapper .PTabs .PTab.active .Scrollable,.PWrapper .PTabs .PTab.active .Divider{filter:blur(0);}
+.PWrapper .PTabs .PTab.active::before{content:"";position:absolute;left:0;top:15%;height:70%;width:.11vw;background:var(--accent);box-shadow:0 0 .25vw var(--accent-glow);}
+.PWrapper .PTabs .PTab .PTLabel{position:absolute;left:.7vw;width:62%;height:60%;font-family:'Space Grotesk',sans-serif;font-size:.59vw;
+    font-weight:400;letter-spacing:.005vw;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;transition:color .15s;}
+.PWrapper .PTabs .PTab.active .PTLabel{color:var(--text-0);font-weight:500;}
+.PWrapper .PTabs .PTab i{position:absolute;right:.65vw;font-size:.48vw;color:var(--text-3);transition:color .15s;}
+.PWrapper .PTabs .PTab.active i,.PWrapper .PTabs .PTab:hover i{color:var(--accent);}
+.PWrapper .PTabs .PTab .Checkbox,.PWrapper .PTabs .PTab .TOptions .Checkbox{position:relative;display:flex;width:1.5625vw;height:.7813vw;
+    justify-content:flex-start;align-items:center;background:rgba(0,0,0,.5);border:.04vw solid var(--accent-border-soft);border-radius:.08vw;transition:.25s ease;}
+.PWrapper .PTabs .PTab .Checkbox.Checked,.PWrapper .PTabs .PTab .TOptions .Checkbox.Checked{background:rgba(0,212,255,.12);border-color:var(--accent);box-shadow:0 0 .25vw var(--accent-glow);}
+.PWrapper .PTabs .PTab .Checkbox .Inside,.PWrapper .PTabs .PTab .TOptions .Checkbox .Inside{position:absolute;left:.1vw;width:.42vw;height:.42vw;background:var(--text-3);border-radius:.04vw;transition:.25s ease;}
+.PWrapper .PTabs .PTab .Checkbox.Checked .Inside,.PWrapper .PTabs .PTab .TOptions .Checkbox.Checked .Inside{left:.95vw;background:var(--accent);box-shadow:0 0 .12vw var(--accent-glow);}
+.PWrapper .PTabs .PTab>.Checkbox{position:absolute;right:.65vw;}
+.PWrapper .PTabs .PTab .Slider,.PWrapper .PTabs .PTab .TOptions .Slider{position:relative;display:flex;width:2.3438vw;height:.17vw;
+    justify-content:flex-start;align-items:center;background:rgba(0,0,0,.6);border:.03vw solid var(--accent-border-soft);}
+.PWrapper .PTabs .PTab .Slider .Progress,.PWrapper .PTabs .PTab .TOptions .Slider .Progress{position:absolute;height:100%;
+    background:linear-gradient(90deg,rgba(0,212,255,.35) 0%,var(--accent) 100%);box-shadow:0 0 .12vw var(--accent-glow);transition:width .15s ease;}
+.PWrapper .PTabs .PTab .Slider .Progress .Thumb,.PWrapper .PTabs .PTab .TOptions .Slider .Progress .Thumb{position:absolute;right:0;width:.36vw;height:.58vw;
+    background:var(--accent);transform:translateY(-50%) translateX(50%);top:50%;box-shadow:0 0 .12vw var(--accent-glow);}
+.PWrapper .PTabs .PTab .Slider{position:absolute;right:.65vw;}
+.PWrapper .PTabs .PTab .TOptions{position:absolute;right:.65vw;display:flex;justify-content:flex-end;align-items:center;gap:.42vw;}
+.PWrapper .PTabs .PTab .Scrollable,.PWrapper .PTabs .PTab .TOptions .Scrollable{position:relative;display:flex;justify-content:center;align-items:center;gap:.22vw;
+    font-family:'JetBrains Mono',monospace;font-size:.54vw;color:var(--text-0);letter-spacing:.02vw;}
+.PWrapper .PTabs .PTab .Scrollable span:first-child,.PWrapper .PTabs .PTab .Scrollable span:last-child,
+.PWrapper .PTabs .PTab .TOptions .Scrollable span:first-child,.PWrapper .PTabs .PTab .TOptions .Scrollable span:last-child{color:var(--accent);font-weight:600;}
+.PWrapper .PTabs .PTab .Scrollable{position:absolute;right:.65vw;}
+.PWrapper .PTabs .PTab .Divider{position:absolute;left:50%;transform:translateX(-50%);display:flex;width:92%;justify-content:space-between;align-items:center;gap:.32vw;}
+.PWrapper .PTabs .PTab .Divider .Left,.PWrapper .PTabs .PTab .Divider .Right{flex:1;height:.03vw;background:linear-gradient(90deg,transparent 0%,var(--accent-border) 50%,transparent 100%);}
+.PWrapper .PTabs .PTab .Divider .Label{font-family:'JetBrains Mono',monospace;font-size:.56vw;font-weight:600;letter-spacing:.1vw;color:var(--accent);
+    white-space:nowrap;padding:0 .32vw;text-transform:uppercase;opacity:.78;text-shadow:0 0 .2vw var(--accent-glow);}
+.PWrapper .PFooter{position:relative;display:flex;width:19.0104vw;height:1.5625vw;justify-content:center;align-items:center;
+    background:var(--bg-1);border-left:.04vw solid var(--accent-border);border-right:.04vw solid var(--accent-border);
+    border-bottom:.04vw solid var(--accent-border);border-top:.04vw solid var(--accent-border-soft);}
+.PWrapper .PFooter img{position:absolute;left:.5vw;width:.78vw;height:.78vw;object-fit:contain;opacity:.65;filter:drop-shadow(0 0 .12vw var(--accent-glow));}
+.PWrapper .PFooter .PBuild{position:absolute;left:1.5vw;font-family:'JetBrains Mono',monospace;font-size:.58vw;font-weight:500;letter-spacing:.06vw;color:var(--accent);text-shadow:0 0 .18vw var(--accent-glow);}
+.PWrapper .PFooter .PIndicator{position:absolute;right:.55vw;font-family:'JetBrains Mono',monospace;font-size:.5vw;color:var(--text-3);letter-spacing:.04vw;}
+.PWrapper .Metadata{position:absolute;display:flex;width:13.5vw;right:-15.4vw;top:-5.3vw;flex-direction:column;align-items:center;gap:.16vw;
+    background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);border:.04vw solid var(--accent-border);padding:.52vw .44vw;
+    box-shadow:0 .4vw 1.4vw rgba(0,0,0,.92),0 0 .5vw var(--accent-glow);}
+.PWrapper .Metadata .Title{width:98%;height:.82vw;display:flex;justify-content:center;align-items:center;}
+.PWrapper .Metadata .Title span{width:100%;font-family:'JetBrains Mono',monospace;font-size:.7vw;font-weight:600;letter-spacing:.09vw;
+    text-align:center;color:var(--accent);text-shadow:0 0 .22vw var(--accent-glow);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;}
+.PWrapper .Metadata .Line{width:98%;height:.03vw;margin-top:.1vw;background:linear-gradient(90deg,transparent 0%,var(--accent-border) 50%,transparent 100%);}
+.PWrapper .Metadata .Values{width:98%;margin-top:.22vw;display:flex;flex-direction:column;gap:.16vw;}
+.PWrapper .Metadata .Values .Value{width:100%;display:flex;align-items:center;padding:.03vw 0;border-bottom:.03vw solid rgba(0,212,255,.03);}
+.PWrapper .Metadata .Values .Value:last-child{border-bottom:none;}
+.PWrapper .Metadata .Values .Value .Key{font-family:'JetBrains Mono',monospace;font-size:.5vw;font-weight:400;letter-spacing:.04vw;color:var(--text-3);text-transform:uppercase;height:.78vw;display:flex;align-items:center;}
+.PWrapper .Metadata .Values .Value .Val{position:absolute;right:.44vw;display:flex;justify-content:flex-end;align-items:center;gap:.2vw;}
+.PWrapper .Metadata .Values .Value .Val span{font-family:'JetBrains Mono',monospace;font-size:.5vw;font-weight:500;color:var(--text-0);height:.78vw;display:flex;align-items:center;letter-spacing:.02vw;}
+.PWrapper .Metadata .Values .Value .Val .Status{width:.18vw;height:.78vw;background:#000;border:.03vw solid var(--accent-border-soft);display:flex;justify-content:center;align-items:flex-end;overflow:hidden;}
+.PWrapper .Metadata .Values .Value .Val .Status .Progress{position:absolute;width:100%;bottom:0;transition:height .25s;}
+.NotificationsWrapper{position:fixed;bottom:.8vw;right:.8vw;display:flex;flex-direction:column;gap:.42vw;z-index:9999;pointer-events:none;}
+.Notification{position:relative;width:16.5vw;padding:.62vw .8vw;display:flex;align-items:center;gap:.52vw;pointer-events:auto;
+    background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);border:.05vw solid var(--accent-border);
+    box-shadow:0 .35vw 1.1vw rgba(0,0,0,.92),0 0 .45vw var(--accent-glow);color:var(--text-1);font-family:'Space Grotesk',sans-serif;
+    opacity:0;transform:translateY(1vw) translateX(140%);transition:opacity .3s ease,transform .6s cubic-bezier(.19,1,.22,1);overflow:hidden;}
+.Notification.enter{opacity:1;transform:translateY(0) translateX(0);}
+.Notification.exit{opacity:0;transform:translateY(1vw) translateX(30%);}
+.Notification i{font-size:.85vw;flex-shrink:0;}
+.Notification .NotificationContent{display:flex;flex-direction:column;gap:.07vw;flex:1;min-width:0;}
+.Notification .NotificationTitle{font-family:'JetBrains Mono',monospace;font-size:.68vw;font-weight:600;letter-spacing:.07vw;text-transform:uppercase;}
+.Notification .NotificationDesc{font-size:.54vw;color:var(--text-2);line-height:1.35;}
+.Notification .NotificationProgress{position:absolute;left:0;bottom:0;height:.11vw;width:100%;animation-timing-function:linear;}
+@keyframes progressBar{from{width:100%;}to{width:0%;}}
+.Overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:9998;}
+.InputWrapper{position:fixed;left:50%;bottom:8vw;transform:translateX(-50%);width:26vw;display:flex;justify-content:center;align-items:center;flex-direction:column;
+    background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);font-family:'JetBrains Mono',monospace;
+    border:.05vw solid var(--accent-border);overflow:hidden;box-shadow:0 1vw 2.5vw rgba(0,0,0,.96),0 0 .65vw var(--accent-glow);z-index:9999;}
+.InputWrapper .Header{display:flex;width:100%;height:1.22vw;justify-content:flex-start;align-items:center;gap:.26vw;
+    border-bottom:.04vw solid var(--accent-border);font-size:.56vw;color:var(--text-1);background:rgba(0,0,0,.38);}
+.InputWrapper .Header img{width:1.05vw;height:.9vw;margin-left:.38vw;object-fit:contain;}
+.InputWrapper .Header .Line{width:.04vw;height:.62vw;background:var(--accent-border);}
+.InputWrapper .Header i{margin-left:.42vw;color:var(--accent);font-size:.53vw;}
+.InputWrapper .Header span{font-weight:600;letter-spacing:.06vw;color:var(--accent);text-transform:uppercase;}
+.InputWrapper .Body{position:relative;display:flex;width:100%;height:1.78vw;justify-content:center;align-items:center;background:rgba(0,0,0,.18);}
+.InputWrapper .Body .InsideCon{position:absolute;width:98%;height:72%;background:rgba(0,0,0,.5);border:.04vw solid var(--accent-border-soft);display:flex;justify-content:flex-start;align-items:center;}
+.InputWrapper .Body span{position:absolute;left:.48vw;font-size:.58vw;color:var(--text-0);}
+.InputWrapper .Body .InsideCon span::after{content:"";display:inline-block;width:.05vw;height:.58vw;background:var(--accent);margin-left:.1vw;margin-bottom:.04vw;animation:blink 1s steps(2,start) infinite;align-self:center;box-shadow:0 0 .1vw var(--accent-glow);}
+@keyframes blink{to{visibility:hidden;}}
+.KBLWrapper{position:fixed;right:1.0417vw;top:1.0417vw;display:flex;width:7.5vw;justify-content:center;align-items:center;flex-direction:column;
+    font-family:'JetBrains Mono',monospace;border:.04vw solid var(--accent-border);overflow:hidden;
+    box-shadow:0 .35vw 1.1vw rgba(0,0,0,.92),0 0 .38vw var(--accent-glow);background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);z-index:9999;}
+.KBLWrapper .Header{display:flex;width:100%;height:1vw;justify-content:flex-start;align-items:center;background:rgba(0,0,0,.48);border-bottom:.04vw solid var(--accent-border);}
+.KBLWrapper .Header .Icon{margin-left:.28vw;color:var(--accent);font-size:.52vw;}
+.KBLWrapper .Header span{margin-left:.18vw;font-size:.56vw;font-weight:600;letter-spacing:.08vw;color:var(--accent);text-transform:uppercase;}
+.KBLWrapper .Binds{display:flex;width:100%;flex-direction:column;gap:.09vw;background:rgba(0,0,0,.18);padding:.16vw 0;}
+.KBLWrapper .Binds .Keybind{display:flex;width:96%;height:.7vw;align-items:center;border-bottom:.03vw solid rgba(0,212,255,.04);margin:0 auto;}
+.KBLWrapper .Binds .Keybind:last-child{border-bottom:none;}
+.KBLWrapper .Binds .Keybind .Label{position:absolute;left:.18vw;font-size:.5vw;color:var(--text-2);}
+.KBLWrapper .Binds .Keybind .Elements{position:absolute;right:.18vw;display:flex;align-items:center;gap:.16vw;}
+.KBLWrapper .Binds .Keybind .Elements span{font-size:.5vw;font-weight:500;color:var(--accent);letter-spacing:.03vw;}
+.Crosshair{position:fixed;left:50%;top:50%;width:1.15vw;transform:translate(-50%,-50%);filter:drop-shadow(0 0 .18vw var(--accent-glow));pointer-events:none;z-index:9997;}
+.FCWrapper{position:fixed;left:50%;bottom:4vw;max-height:13vw;transform:translateX(-50%);display:flex;justify-content:flex-start;align-items:center;flex-direction:column;font-family:'JetBrains Mono',monospace;gap:.28vw;z-index:9997;}
+.FCWrapper .Option{display:flex;justify-content:center;align-items:center;font-size:.98vw;font-weight:600;letter-spacing:.08vw;color:var(--text-2);text-shadow:0 0 .3vw rgba(0,0,0,.9);transition:opacity .25s,transform .15s;text-transform:uppercase;}
+.FCWrapper .Option.Selected{color:var(--accent);transform:scale(1.05);text-shadow:0 0 .28vw var(--accent-glow),0 0 .6vw rgba(0,0,0,.9);}
+.FCWrapper .Option .FCdash{color:var(--accent);font-weight:700;}
+.FCWrapper .Option .CycleHighlight{color:var(--accent);font-weight:700;letter-spacing:.04vw;}
+::-webkit-scrollbar{width:0;height:0;background:transparent;}
+.Desc{position:fixed;left:50%;bottom:1.5vw;transform:translateX(-50%);display:flex;width:auto;max-width:60vw;
+    background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg-1) 100%);border:.04vw solid var(--accent-border);padding:.42vw .82vw;
+    font-family:'JetBrains Mono',monospace;font-size:.56vw;letter-spacing:.03vw;color:var(--text-1);
+    justify-content:center;align-items:center;box-shadow:0 .35vw 1.1vw rgba(0,0,0,.92),0 0 .38vw var(--accent-glow);text-align:center;z-index:9996;}
+.Desc .hazard{color:var(--warn);margin-left:.2vw;} .Desc .locked{color:var(--danger);margin-left:.2vw;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(.4vw);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(.4vw);}}
+.fadeIn{animation:fadeIn .22s ease-out;} .fadeOut{animation:fadeOut .18s ease-in;}
+</style>
+</head>
+<body>
+<div id="root">
+    <div class="PWrapper" id="menuWrapper" style="visibility:hidden;">
+        <div class="PBanner">
+            <img id="bannerImg" src="https://i.postimg.cc/63Wfjhfg/60555fdf-8704-4a32-a1cf-0b864d4439a2.png" draggable="false" alt="">
+            <span class="PBannerTitle">MachoMenus</span>
+            <span class="PBannerSub" id="bannerSub">33 menus · no-key</span>
+        </div>
+        <div class="PElements">
+            <div class="PScroll">
+                <i class="fa-solid fa-angle-up"></i>
+                <div class="PSProgressWrapper"><div class="PSProgress" id="psProgress" style="height:97%;top:0%;"></div></div>
+                <i class="fa-solid fa-angle-down"></i>
+            </div>
+            <div class="PRightElements">
+                <div class="PCategories" id="categories"></div>
+                <div class="PTabs" id="tabs">
+                    <div id="activeIndicator" style="position:absolute;width:100%;top:0;height:1.5625vw;background:rgba(0,212,255,0.05);z-index:0;transition:top 200ms ease,height 120ms ease;pointer-events:none;"></div>
+                </div>
+                <div class="PFooter">
+                    <img src="https://i.postimg.cc/cCM7nm31/1ef3dff8bebea3f343874bed403b059e.webp" alt="">
+                    <span class="PBuild" id="footerBuild">MachoMenus</span>
+                    <span class="PIndicator" id="footerIndicator">(0/0)</span>
+                </div>
+            </div>
+        </div>
+        <div class="Metadata" id="metadata" style="display:none;"></div>
+    </div>
+    <div class="NotificationsWrapper" id="notifications"></div>
+    <div id="keyboardInput" style="display:none;">
+        <div class="Overlay"></div>
+        <div class="InputWrapper">
+            <div class="Header">
+                <img src="https://i.postimg.cc/cCM7nm31/1ef3dff8bebea3f343874bed403b059e.webp" alt="">
+                <div class="Line"></div><i class="fa-solid fa-terminal"></i>
+                <span id="keyboardTitle">Input</span>
+            </div>
+            <div class="Body"><div class="InsideCon"><span id="keyboardValue"></span></div></div>
+        </div>
+    </div>
+    <div class="KBLWrapper" id="keybindsPanel" style="display:none;">
+        <div class="Header"><i class="fa-solid fa-keyboard Icon"></i><span>Binds</span></div>
+        <div class="Binds" id="keybindsList"></div>
+    </div>
+    <img class="Crosshair" id="crosshair" src="https://files.catbox.moe/cm9g47.png" draggable="false" alt="" style="display:none;">
+    <div class="FCWrapper" id="freecamOptions" style="display:none;"></div>
+    <div class="Desc" id="descBox" style="display:none;"><span id="descText"></span></div>
+</div>
+<script>
+(function(){
+"use strict";
+
+const DEMO_ELEMENTS=[
+    {"type":"divider","label":"FULL FEATURED"},
+    {"type":"subMenu","label":"Shadow v3.1","desc":"Player · Aimbot · Weapons · Teleport · Triggers · Server · Vehicle · Ped · Misc · Protections · Settings","metaData":[{"key":"Tabs","value":"11"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"X9","desc":"Player · Server · Teleport · Weapon · Vehicle · Emotes · Events · Misc","metaData":[{"key":"Tabs","value":"8"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"CellyV2","desc":"Self · Online · Weapons · Vehicle · Teleport · Misc · Emotes · Events · Settings","metaData":[{"key":"Tabs","value":"9"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"CellyV3","desc":"Self · Online · Weapons · Vehicle · Teleport · Misc · Emotes · Events · Settings","metaData":[{"key":"Tabs","value":"9"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"RAGE","desc":"Player · Online · Weapons · Vehicle · Settings","metaData":[{"key":"Tabs","value":"5"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Plaid","desc":"Self · Combat · Vehicle · Visuals · Emotes · Online · Server · Misc · Settings","metaData":[{"key":"Tabs","value":"9"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Sinful","desc":"Self · Utilities · Trolls · Vehicles · Automation · Blockers · Spawner · Settings","metaData":[{"key":"Tabs","value":"8"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Satanic","desc":"Self · Utilities · Trolls · Vehicles · Automation · Blockers · Spawner · Settings","metaData":[{"key":"Tabs","value":"8"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Lucid","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Storm V3","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"HexMenu","desc":"Player · Online · Vehicle · Weapon · Server · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"CrackV","desc":"Player · Vehicle · Weapon · Online · Server · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Junkie","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Wiped","desc":"Player · Vehicle · Weapon · Server · Settings","metaData":[{"key":"Tabs","value":"5"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"FlowMenu","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Test2","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"WoahV4","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Havoc","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Eternity","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Nexus","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Scythe","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"Wentra","desc":"Player · Online · Vehicle · Weapon · Teleport · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"RX","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"subMenu","label":"CvMenu","desc":"Player · Online · Vehicle · Weapon · Misc · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"FULL"}]},
+    {"type":"divider","label":"ESX / SERVER"},
+    {"type":"subMenu","label":"LARP","desc":"Player · Server · Vehicle · Weapon · Online · Misc · Settings","metaData":[{"key":"Tabs","value":"7"},{"key":"Type","value":"ESX"}]},
+    {"type":"subMenu","label":"Ghost","desc":"Player · Online · Vehicle · Weapon · Server · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"ESX"}]},
+    {"type":"subMenu","label":"Oni","desc":"Player · Online · Vehicle · Weapon · Server · Settings","metaData":[{"key":"Tabs","value":"6"},{"key":"Type","value":"ESX"}]},
+    {"type":"divider","label":"COMPACT"},
+    {"type":"subMenu","label":"X9 Private","desc":"Player · Server · Misc","metaData":[{"key":"Tabs","value":"3"},{"key":"Type","value":"COMPACT"}]},
+    {"type":"subMenu","label":"Rechib","desc":"Player · Misc","metaData":[{"key":"Tabs","value":"2"},{"key":"Type","value":"COMPACT"}]},
+    {"type":"subMenu","label":"Kanki","desc":"Player · Misc","metaData":[{"key":"Tabs","value":"2"},{"key":"Type","value":"COMPACT"}]},
+    {"type":"subMenu","label":"DarkSide","desc":"Spawner · Misc · Settings","metaData":[{"key":"Tabs","value":"3"},{"key":"Type","value":"COMPACT"}]},
+    {"type":"subMenu","label":"Cyphr","desc":"Player · Online · Misc","metaData":[{"key":"Tabs","value":"3"},{"key":"Type","value":"COMPACT"}]},
+    {"type":"subMenu","label":"PrivateBig","desc":"Events · Misc","metaData":[{"key":"Tabs","value":"2"},{"key":"Type","value":"COMPACT"}]}
+  ];
+const DEMO_CATS=[{"label":"ALL"},{"label":"FULL"},{"label":"ESX"},{"label":"COMPACT"}];
+
+/* ── State ─────────────────────────────────────────────── */
+const State={
+    visible:false,elements:[],index:0,
+    categories:null,categoryIndex:0,menuPath:[],
+    username:"MachoMenus",
+    freecamVisible:false,freecamWeapons:[],freecamVehicles:[],
+    freecamWeaponIndex:0,freecamVehicleIndex:0,
+    freecamOptions:["Default","Teleport","Shoot Weapon","Spawn Vehicle","Kick from Vehicle","Hijack Vehicle","Delete Vehicle"],
+    freecamOptionIndex:0,notificationId:0,
+    // Multi-menu accumulation
+    menuRegistry:{},   // {sourceTag: elements}
+    activeSource:null
+};
+
+const DOM={
+    wrapper:document.getElementById("menuWrapper"),tabs:document.getElementById("tabs"),
+    categories:document.getElementById("categories"),activeIndicator:document.getElementById("activeIndicator"),
+    footerIndicator:document.getElementById("footerIndicator"),footerBuild:document.getElementById("footerBuild"),
+    bannerSub:document.getElementById("bannerSub"),
+    metadata:document.getElementById("metadata"),notifications:document.getElementById("notifications"),
+    keyboardInput:document.getElementById("keyboardInput"),keyboardTitle:document.getElementById("keyboardTitle"),
+    keyboardValue:document.getElementById("keyboardValue"),keybindsPanel:document.getElementById("keybindsPanel"),
+    keybindsList:document.getElementById("keybindsList"),crosshair:document.getElementById("crosshair"),
+    freecamOptions:document.getElementById("freecamOptions"),descBox:document.getElementById("descBox"),
+    descText:document.getElementById("descText"),bannerImg:document.getElementById("bannerImg"),
+    psProgress:document.getElementById("psProgress")
+};
+
+function el(tag,cn,html){const e=document.createElement(tag);if(cn)e.className=cn;if(html!==undefined)e.innerHTML=html;return e;}
+function esc(s){if(s==null)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function isN(v){return typeof v==="number"&&!isNaN(v);}
+
+/* ── Categories ─────────────────────────────────────────── */
+function renderCategories(){
+    DOM.categories.innerHTML="";
+    if(State.categories&&State.categories.length>0){
+        State.categories.forEach((cat,i)=>{
+            const c=el("div","PCategory"+(i===State.categoryIndex?" active":""));
+            c.textContent=cat.label||"";DOM.categories.appendChild(c);
+        });
+    }else{
+        const c=el("div","PCategory active");
+        c.textContent=State.menuPath.length>0?State.menuPath[State.menuPath.length-1]:"MACHO MENUS";
+        DOM.categories.appendChild(c);
+    }
+}
+
+/* ── Tabs ───────────────────────────────────────────────── */
+function renderTabs(){
+    Array.from(DOM.tabs.querySelectorAll(".PTab")).forEach(n=>n.remove());
+    State.elements.forEach((tab,i)=>{
+        if(!tab||!tab.type)return;
+        const tabEl=el("div","PTab"+(i===State.index?" active":""));
+        tabEl.dataset.index=i;
+        if(tab.type==="divider"){
+            const d=el("div","Divider");d.appendChild(el("div","Left"));
+            const lbl=el("span","Label");lbl.textContent=tab.label||"";d.appendChild(lbl);
+            d.appendChild(el("div","Right"));tabEl.appendChild(d);DOM.tabs.appendChild(tabEl);return;
+        }
+        const label=el("span","PTLabel");
+        let lt=tab.label||"";
+        if(i===State.index&&(tab.type==="slider"||tab.type==="slider-checkbox")){
+            const min=isN(tab.min)?tab.min:0,val=isN(tab.value)?tab.value:min;
+            lt=`${tab.label||""}: ${val}`;
+        }
+        label.textContent=lt;
+        if(tab.hazardous){const hz=el("span");hz.style.color="#ffaa00";hz.textContent=" ⚠";label.appendChild(hz);}
+        if(tab.locked){const lk=el("span");lk.style.color="#ff3355";lk.textContent=" 🔒";label.appendChild(lk);}
+        tabEl.appendChild(label);
+        switch(tab.type){
+            case"subMenu":tabEl.appendChild(el("i","fa-solid fa-angle-right"));break;
+            case"checkbox":{const cb=el("div","Checkbox"+(tab.checked?" Checked":""));cb.appendChild(el("div","Inside"));tabEl.appendChild(cb);break;}
+            case"slider":{
+                const sl=el("div","Slider"),pr=el("div","Progress");
+                const min=isN(tab.min)?tab.min:0,max=isN(tab.max)?tab.max:100,val=isN(tab.value)?tab.value:min;
+                pr.style.width=(max>min?((val-min)/(max-min))*100:0)+"%";
+                pr.appendChild(el("div","Thumb"));sl.appendChild(pr);tabEl.appendChild(sl);break;
+            }
+            case"slider-checkbox":{
+                const wrap=el("div","TOptions"),sl=el("div","Slider"),pr=el("div","Progress");
+                const min=isN(tab.min)?tab.min:0,max=isN(tab.max)?tab.max:100,val=isN(tab.value)?tab.value:min;
+                pr.style.width=(max>min?((val-min)/(max-min))*100:0)+"%";
+                pr.appendChild(el("div","Thumb"));sl.appendChild(pr);wrap.appendChild(sl);
+                const cb=el("div","Checkbox"+(tab.checked?" Checked":""));cb.appendChild(el("div","Inside"));wrap.appendChild(cb);tabEl.appendChild(wrap);break;
+            }
+            case"scrollable":{
+                const sc=el("div","Scrollable"),vals=tab.values||[],vi=isN(tab.value)?tab.value-1:0;
+                const cur=vals[vi]!==undefined?vals[vi]:"";
+                sc.appendChild(el("span",null,"<"));sc.appendChild(el("span",null,esc(cur)));sc.appendChild(el("span",null,">"));
+                tabEl.appendChild(sc);break;
+            }
+            case"scrollable-checkbox":{
+                const wrap=el("div","TOptions"),sc=el("div","Scrollable"),vals=tab.values||[],vi=isN(tab.value)?tab.value-1:0;
+                const cur=vals[vi]!==undefined?vals[vi]:"";
+                sc.appendChild(el("span",null,"<"));sc.appendChild(el("span",null,esc(cur)));sc.appendChild(el("span",null,">"));
+                wrap.appendChild(sc);
+                const cb=el("div","Checkbox"+(tab.checked?" Checked":""));cb.appendChild(el("div","Inside"));wrap.appendChild(cb);tabEl.appendChild(wrap);break;
+            }
+        }
+        DOM.tabs.appendChild(tabEl);
+    });
+    updateActiveIndicator();updateFooter();updateDesc();
+}
+
+function updateActiveIndicator(){
+    const active=DOM.tabs.querySelector(".PTab.active");
+    if(!active){DOM.activeIndicator.style.opacity="0";return;}
+    DOM.activeIndicator.style.opacity="1";
+    DOM.activeIndicator.style.top=active.offsetTop+"px";
+    DOM.activeIndicator.style.height=active.offsetHeight+"px";
+    scrollActiveIntoView(active);updateScrollProgress();
+}
+function scrollActiveIntoView(e){
+    const c=DOM.tabs,ct=c.scrollTop,cb=ct+c.clientHeight,et=e.offsetTop,eb=et+e.offsetHeight;
+    if(et<ct)c.scrollTop=et-4;else if(eb>cb)c.scrollTop=eb-c.clientHeight+4;
+}
+function updateScrollProgress(){
+    const c=DOM.tabs,total=c.scrollHeight,visible=c.clientHeight;
+    if(total<=visible){DOM.psProgress.style.height="97%";DOM.psProgress.style.top="0%";return;}
+    const ratio=visible/total,barH=Math.max(ratio*97,10),maxT=97-barH,sr=c.scrollTop/(total-visible);
+    DOM.psProgress.style.height=barH+"%";DOM.psProgress.style.top=(sr*maxT)+"%";
+}
+function updateFooter(){
+    const total=State.elements.filter(e=>e&&e.type!=="divider").length;
+    const current=State.elements.slice(0,State.index+1).filter(e=>e&&e.type!=="divider").length;
+    DOM.footerIndicator.textContent=`(${current}/${total})`;
+}
+function updateDesc(){
+    const tab=State.elements[State.index];
+    if(!tab||!tab.desc||tab.type==="divider"){DOM.descBox.style.display="none";return;}
+    DOM.descBox.style.display="flex";
+    let html=esc(tab.desc);
+    if(tab.hazardous)html+='<span class="hazard">\u00a0\u26a0\ufe0f Server may detect</span>';
+    if(tab.locked)html+='<span class="locked">\u00a0\ud83d\udd12 Locked</span>';
+    DOM.descText.innerHTML=html;
+}
+function renderMetadata(){
+    const tab=State.elements[State.index];
+    if(!tab||!tab.metaData||tab.metaData.length===0){DOM.metadata.style.display="none";return;}
+    DOM.metadata.style.display="flex";DOM.metadata.innerHTML="";
+    const title=el("div","Title");title.appendChild(el("span",null,esc(tab.name||tab.label||"")));DOM.metadata.appendChild(title);
+    DOM.metadata.appendChild(el("div","Line"));
+    const values=el("div","Values");
+    tab.metaData.forEach(md=>{
+        const row=el("div","Value");
+        const key=el("div","Key");key.textContent=md.key||"";row.appendChild(key);
+        const val=el("div","Val");
+        const vs=el("span");vs.textContent=md.value!==undefined?String(md.value):"";
+        if(md.key==="Weapons"||md.key==="الأسلحة")vs.style.color="#ff3355";
+        val.appendChild(vs);
+        if((md.key==="Health"||md.key==="Armour"||md.key==="دم الاعب"||md.key==="درع الاعب")&&md.color){
+            const status=el("div","Status");status.style.backgroundColor=`rgba(${md.color},.18)`;
+            const prog=el("div","Progress");const num=parseInt(md.value,10);
+            prog.style.height=(isNaN(num)?0:num)+"%";prog.style.backgroundColor=`rgb(${md.color})`;
+            status.appendChild(prog);val.appendChild(status);
+        }
+        row.appendChild(val);values.appendChild(row);
+    });
+    DOM.metadata.appendChild(values);
+}
+function showNotification(type,title,desc,duration){
+    duration=duration||4000;const id=++State.notificationId;
+    const notif=el("div","Notification "+type);notif.id="notif-"+id;
+    const ic=type==="success"?"fa-circle-check":type==="error"?"fa-circle-xmark":"fa-circle-info";
+    const col=type==="success"?"#00d4ff":type==="error"?"#ff3355":"#00d4ff";
+    const icon=el("i","fa-solid "+ic);icon.style.color=col;notif.appendChild(icon);
+    const content=el("div","NotificationContent");
+    const t=el("div","NotificationTitle");t.textContent=title||"";t.style.color=col;content.appendChild(t);
+    if(desc){const d=el("div","NotificationDesc");d.textContent=desc;content.appendChild(d);}
+    notif.appendChild(content);
+    const prog=el("div","NotificationProgress");prog.style.animation=`progressBar ${duration}ms linear forwards`;prog.style.backgroundColor=col;
+    notif.appendChild(prog);DOM.notifications.appendChild(notif);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>notif.classList.add("enter")));
+    setTimeout(()=>{notif.classList.remove("enter");notif.classList.add("exit");setTimeout(()=>notif.remove(),700);},duration);
+}
+function updateKeyboard(visible,title,value){
+    if(!visible){DOM.keyboardInput.style.display="none";return;}
+    DOM.keyboardInput.style.display="block";
+    DOM.keyboardTitle.textContent=title||"Input";DOM.keyboardValue.textContent=value||"";
+}
+function updateKeybinds(visible,binds){
+    if(!visible){DOM.keybindsPanel.style.display="none";return;}
+    DOM.keybindsPanel.style.display="flex";DOM.keybindsList.innerHTML="";
+    (binds||[]).forEach(bind=>{
+        const row=el("div","Keybind"),label=el("div","Label");label.textContent=bind.label||"";row.appendChild(label);
+        const elements=el("div","Elements"),isT=bind.type==="checkbox"||bind.type==="slider-checkbox";
+        const ks=el("span");ks.textContent=isT?`(${bind.keyLabel||"?"})` :(bind.keyLabel||"?");elements.appendChild(ks);
+        if(isT){const ss=el("span");ss.textContent=bind.checked?"ON":"OFF";ss.style.color=bind.checked?"var(--accent)":"rgba(0,212,255,.3)";elements.appendChild(ss);}
+        row.appendChild(elements);DOM.keybindsList.appendChild(row);
+    });
+}
+function updateFreecam(visible,wi,vi){
+    State.freecamVisible=visible;
+    if(wi!==undefined)State.freecamWeaponIndex=wi-1;
+    if(vi!==undefined)State.freecamVehicleIndex=vi-1;
+    if(!visible){DOM.freecamOptions.style.display="none";DOM.crosshair.style.display="none";return;}
+    DOM.freecamOptions.style.display="flex";DOM.crosshair.style.display="block";DOM.freecamOptions.innerHTML="";
+    State.freecamOptions.forEach((opt,i)=>{
+        const isSel=i===State.freecamOptionIndex,dist=Math.abs(i-State.freecamOptionIndex),opacity=Math.max(1-dist*.12,.3);
+        const optEl=el("div","Option"+(isSel?" Selected":""));optEl.style.opacity=opacity;
+        let html="";if(isSel)html+='<span class="FCdash">--</span>  ';
+        html+=esc(opt);
+        if(isSel&&opt==="Shoot Weapon"&&State.freecamWeapons[State.freecamWeaponIndex])html+=`  <span class="CycleHighlight">(${esc(State.freecamWeapons[State.freecamWeaponIndex])})</span>`;
+        if(isSel&&opt==="Spawn Vehicle"&&State.freecamVehicles[State.freecamVehicleIndex])html+=`  <span class="CycleHighlight">(${esc(State.freecamVehicles[State.freecamVehicleIndex])})</span>`;
+        if(isSel)html+='  <span class="FCdash">--</span>';
+        optEl.innerHTML=html;DOM.freecamOptions.appendChild(optEl);
+    });
+}
+function scrollFreecam(dir){
+    if(!State.freecamVisible)return;
+    if(dir==="up")State.freecamOptionIndex=(State.freecamOptionIndex-1+State.freecamOptions.length)%State.freecamOptions.length;
+    else State.freecamOptionIndex=(State.freecamOptionIndex+1)%State.freecamOptions.length;
+    updateFreecam(true);
+}
+function showUI(){
+    State.visible=true;DOM.wrapper.style.visibility="visible";
+    DOM.wrapper.classList.remove("fadeOut");DOM.wrapper.classList.add("fadeIn");
+    renderCategories();renderTabs();renderMetadata();
+}
+function hideUI(){
+    State.visible=false;DOM.wrapper.classList.remove("fadeIn");DOM.wrapper.classList.add("fadeOut");
+    setTimeout(()=>{
+        if(!State.visible){DOM.wrapper.style.visibility="hidden";DOM.metadata.style.display="none";DOM.descBox.style.display="none";}
+    },220);
+}
+
+/* ── Message Handler ───────────────────────────────────── */
+window.addEventListener("message",function(event){
+    const data=event.data;
+    if(!data||typeof data!=="object")return;
+    const action=data.action;
+    switch(action){
+        case"showUI":{
+            if(data.visible===false){hideUI();return;}
+            if(Array.isArray(data.elements))State.elements=data.elements;
+            if(typeof data.index==="number")State.index=data.index;
+            if(data.path)State.menuPath=data.path;
+            if(data.username){State.username=data.username;DOM.footerBuild.textContent=data.username;}
+            if(Array.isArray(data.categories)&&data.categories.length>0){
+                State.categories=data.categories;State.categoryIndex=typeof data.categoryIndex==="number"?data.categoryIndex:0;
+            }else{State.categories=null;State.categoryIndex=0;}
+            showUI();break;
+        }
+        case"updateElements":{
+            if(Array.isArray(data.elements))State.elements=data.elements;
+            if(typeof data.index==="number")State.index=data.index;
+            if(data.path)State.menuPath=data.path;
+            if(Array.isArray(data.categories)&&data.categories.length>0){
+                State.categories=data.categories;State.categoryIndex=typeof data.categoryIndex==="number"?data.categoryIndex:0;
+            }else{State.categories=null;State.categoryIndex=0;}
+            renderCategories();renderTabs();renderMetadata();break;
+        }
+        case"keydown":{if(typeof data.index==="number"){State.index=data.index;updateActiveTab();}break;}
+        case"showNotification":{showNotification(data.type||"info",data.title||"",data.desc||"",data.duration||4000);break;}
+        case"displayBinds":{updateKeybinds(!!data.visible,data.binds||[]);break;}
+        case"displayFreecam":{updateFreecam(!!data.visible,data.weaponIndex,data.vehicleIndex);break;}
+        case"updateWeapon":{if(typeof data.index==="number"){State.freecamWeaponIndex=data.index-1;updateFreecam(true);}break;}
+        case"updateVehicle":{if(typeof data.index==="number"){State.freecamVehicleIndex=data.index-1;updateFreecam(true);}break;}
+        case"scroll":{scrollFreecam(data.direction);break;}
+        case"updateKeyboard":{updateKeyboard(!!data.visible,data.title,data.value);break;}
+        case"updateBanner":{if(data.bannerLink)DOM.bannerImg.src=data.bannerLink;break;}
+        case"setMenuPosition":{
+            const r=document.documentElement;
+            if(data.x==="Left")r.style.setProperty("--menu-x","3vw");
+            else if(data.x==="Center")r.style.setProperty("--menu-x","50vw");
+            else if(data.x==="Right")r.style.setProperty("--menu-x","85vw");
+            if(data.y==="Top")r.style.setProperty("--menu-y","5vh");
+            else if(data.y==="Middle")r.style.setProperty("--menu-y","50vh");
+            else if(data.y==="Bottom")r.style.setProperty("--menu-y","85vh");
+            break;
+        }
+        case"updatePosition":case"updatePositionPrecise":{
+            const r=document.documentElement;
+            if(data.position){
+                if(data.position.x!==undefined)r.style.setProperty("--menu-x",data.position.x+"%");
+                if(data.position.y!==undefined)r.style.setProperty("--menu-y",data.position.y+"%");
+            }break;
+        }
+    }
+});
+
+function updateActiveTab(){
+    DOM.tabs.querySelectorAll(".PTab").forEach((t,i)=>{
+        if(i===State.index)t.classList.add("active");else t.classList.remove("active");
+    });
+    updateActiveIndicator();updateFooter();updateDesc();renderMetadata();
+}
+
+window.addEventListener("wheel",function(e){
+    if(!State.visible||State.freecamVisible)return;
+    if(e.deltaY<0)State.index=(State.index-1+State.elements.length)%State.elements.length;
+    else State.index=(State.index+1)%State.elements.length;
+    updateActiveTab();
+},{passive:true});
+
+DOM.tabs.addEventListener("scroll",()=>updateScrollProgress(),{passive:true});
+window.addEventListener("resize",()=>updateActiveIndicator());
+
+/* ── Demo mode (browser / not in FiveM) ─────────────────── */
+if(!window.invokeNative){
+    State.elements=DEMO_ELEMENTS;
+    State.categories=DEMO_CATS;
+    State.categoryIndex=0;
+    State.index=1;
+    DOM.footerBuild.textContent="MachoMenus";
+    DOM.bannerSub.textContent="33 menus · no-key · demo";
+    showUI();
+}
+
+console.log("[MachoMenus] DUI ready — 33 menus · one URL");
+})();
+</script>
+</body>
+</html>
